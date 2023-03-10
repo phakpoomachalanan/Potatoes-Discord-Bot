@@ -56,7 +56,5 @@ async def on_message(message):
         textToCode(message)
     elif msg_channel == CHATGPT_CHANNEL_ID:
         await askChatGpt(message)
-    
 
 client.run(TOKEN)
-
