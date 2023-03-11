@@ -14,6 +14,81 @@ CHATGPT_CHANNEL_ID = getenv("CHATGPT_CHANNEL_ID")
 client = discord.Client(intents=discord.Intents(members=True, message_content=True, guild_messages=True, guild_reactions=True, guilds=True))
 openai.api_key = OPENAI_API_KEY
 
+solution = ""
+meaning = ""
+times_ans = 0
+
+async def play_wordle(message):
+    if (times_ans == 0):
+        global solution, meaning
+        temp = generate_5_letter_word().split()
+        solution = temp[0]
+        meaning = temp[2]
+    else:
+        times_ans += 1
+        result = check_ans(message.content)
+        msg_channel = message.channel
+        if (result == solution):
+            await msg_channel.send(f"```{times_ans} tries\n{solution} - {meaning}```")
+        else:
+            await msg_channel.send(f"```{times_ans} tries\n{result}```")
+            if times_ans == 6:
+                times_ans = 0
+                await msg_channel.send(f"{solution} - {meaning}")
+
+def check_ans(guess):
+    result = ""
+
+    # https://github.com/dgvai/wordle-algorithm/blob/master/wordle.py
+    splitSolution = list(solution)
+    splitGuess = list(guess)
+
+    solutionCharsTaken = list(map(lambda x: False, splitSolution))
+
+    statuses = [None] * len(guess)
+    for (i, letter) in enumerate(splitGuess):
+        if(letter == splitSolution[i]):
+            statuses[i] = 'correct'
+            solutionCharsTaken[i] = True
+            continue
+    
+    # Absent Cases
+
+    for (i, letter) in enumerate(splitGuess):
+
+        if(statuses[i]) : continue
+
+        if(letter not in splitSolution):
+            statuses[i] = 'absent'
+            continue
+
+        # Present Cases
+        
+        indexOfPresentChar = splitSolution.index(letter) if not solutionCharsTaken[splitSolution.index(letter)] else -1
+
+        if(indexOfPresentChar > -1):
+            statuses[i] = 'present'
+            solutionCharsTaken[indexOfPresentChar] = True
+            continue
+        else:
+            statuses[i] = 'absent'
+            continue
+    
+    for (i, item) in enumerate(statuses):
+        if (item == 'correct'):
+            result += solution[i]
+        elif (item == 'present'):
+            result += "/"
+        else:
+            result += "-"
+    return result
+
+def generate_5_letter_word():
+    response = ask_chat_gpt("generate 5-letter word")
+    while (response["choices"][0]["finish_reason"] == "null"):
+        response = ask_chat_gpt("generate 5-letter word")
+    return response["choices"][0]["message"]["content"]
+
 async def text_to_code(message):
     user = message.autho
     msg = message.content
@@ -25,16 +100,19 @@ async def text_to_code(message):
 
     return
 
-async def ask_chat_gpt(message):
-    msg = message.content
-
+async def ask_chat_gpt(msg):
     response = openai.ChatCompletion.create(
         model = "gpt-3.5-turbo",
         messages = [
-            {"role": "user", "content": msg + " please make response message under 2000 letters"}
+            {"role": "user", "content": msg}
         ]
     )
 
+    return response
+
+async def return_ans(message):
+    msg = message.content + " please make response message under 2000 letters"
+    response = ask_chat_gpt(msg)
     res_choices = response["choices"][0]
     res_msg = res_choices["message"]["content"]
 
