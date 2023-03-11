@@ -8,9 +8,8 @@ load_dotenv('.env')
 
 TOKEN = getenv("TOKEN")
 OPENAI_API_KEY = getenv("OPENAI_API_KEY")
-
-CODE_CHANNEL_ID = "1083305217799487508"
-CHATGPT_CHANNEL_ID = "1083327345080926208"
+CODE_CHANNEL_ID = getenv("CODE_CHANNEL_ID")
+CHATGPT_CHANNEL_ID = getenv("CHATGPT_CHANNEL_ID")
 
 client = discord.Client(intents=discord.Intents(members=True, message_content=True, guild_messages=True, guild_reactions=True, guilds=True))
 openai.api_key = OPENAI_API_KEY
