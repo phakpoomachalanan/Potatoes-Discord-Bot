@@ -20,7 +20,7 @@ client = discord.Client(intents=discord.Intents(members=True, message_content=Tr
 openai.api_key = OPENAI_API_KEY
 
 solution = "qwert".upper()
-meaning = "asd"
+meaning = "idk"
 times_ans = 0
 sol_dict = dict()
 
@@ -41,7 +41,7 @@ async def play_wordle(message):
 
     msg_channel = message.channel
     msg = message.content.upper()
-    
+
     if (has_meaning(msg, False) == False):
         await msg_channel.send(f"No Definitions Found.", reference=message)
         return
