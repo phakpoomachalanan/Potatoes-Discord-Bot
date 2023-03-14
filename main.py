@@ -25,13 +25,16 @@ times_ans = 0
 sol_dict = dict()
 
 async def play_wordle(message):
+    """
+    Wordle main program
+    """
     global times_ans
 
     if (times_ans == 0):
         global solution, meaning
         solution = await generate_5_letter_word()
 
-        while (has_meaning(solution, True) == False):
+        while (not has_meaning(solution, True)):
             solution = await generate_5_letter_word()
 
         print(solution, meaning)
@@ -42,7 +45,7 @@ async def play_wordle(message):
     msg_channel = message.channel
     msg = message.content.upper()
 
-    if (has_meaning(msg, False) == False):
+    if (not has_meaning(msg, False)):
         await msg_channel.send(f"No Definitions Found.", reference=message)
         return
 
@@ -62,7 +65,10 @@ async def play_wordle(message):
             times_ans = 0
             await msg_channel.send(f"```{solution} - {meaning}```", reference=message)
 
-def has_meaning(word, is_solution):
+def has_meaning(word: str, is_solution: bool):
+    """
+    Return True if word has meaning in dictionaryapi
+    """
     temp = requests.get(DICT_URL + word).json()
     try: 
         temp = temp[0]["meanings"][0]["definitions"][0]["definition"]
@@ -73,25 +79,33 @@ def has_meaning(word, is_solution):
         return False
     return True
 
-def check_ans(guess):
+def check_ans(guess: str):
+    """
+    Return how close your guess was to the word.
+    """
     result = ["" for i in range(5)]
     
     gue_dict = dict()
     now_dict = dict()
 
+    # Correct cases
     for i in range(5):
         char = guess[i]
         if (char in solution):
             gue_dict[char] = guess.count
             now_dict[char] = 0
 
+    # Wrong cases
     for i in range(5):
         char = guess[i]
+        # Wrong spot
         if (char == solution[i]):
             now_dict[char] += 1
             result[i] = solution[i]
+        # Absent cases
         else:
             result[i] = "-"
+
     for i in range(5):
         char = guess[i]
         if (char in solution and now_dict[char] < sol_dict[char]):
@@ -101,11 +115,17 @@ def check_ans(guess):
     return "".join(result)
 
 async def generate_5_letter_word():
+    """
+    Get random 5-letter word from random-word-api.herokuapp
+    """
     response = requests.get("https://random-word-api.herokuapp.com/word?length=5")
     return response.content.decode("utf-8").strip("[\"]").upper()
 
 async def text_to_code(message):
-    user = message.autho
+    """
+    Get message from user in CODE_CHANNEL_ID then send that message in code block 
+    """
+    user = message.author
     msg = message.content
     lang = msg.split()[0]
     code = msg[len(lang):]
@@ -116,6 +136,9 @@ async def text_to_code(message):
     return
 
 async def ask_chat_gpt(message):
+    """
+    
+    """
     msg = message.content + " please make response message under 2000 letters"
     response = await get_ans(msg)
     if (response != "null"):
@@ -123,7 +146,10 @@ async def ask_chat_gpt(message):
     else:
         await message.channel.send("API request failed", reference=message)
 
-async def get_ans(msg):
+async def get_ans(msg: str):
+    """
+    
+    """
     response = openai.ChatCompletion.create(
         model = "gpt-3.5-turbo",
         messages = [
@@ -145,6 +171,9 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+    """
+    Main program
+    """
     if message.author == client.user:
         return
     
@@ -159,4 +188,5 @@ async def on_message(message):
     elif (msg_channel == WORDLE_CHANNEL_ID):
         await play_wordle(message)
 
-client.run(TOKEN)
+if (__name__ == "__main__"):
+    client.run(TOKEN)
