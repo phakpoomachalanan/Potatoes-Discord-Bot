@@ -4,6 +4,7 @@ import asyncio
 import requests
 from os import getenv
 from dotenv import load_dotenv
+from lang import lang as language
 
 load_dotenv('.env')
 
@@ -19,10 +20,11 @@ DICT_URL = "https://api.dictionaryapi.dev/api/v2/entries/en/"
 client = discord.Client(intents=discord.Intents(members=True, message_content=True, guild_messages=True, guild_reactions=True, guilds=True))
 openai.api_key = OPENAI_API_KEY
 
-solution = "qwert".upper()
+solution = "mails".upper()
 meaning = "idk"
 times_ans = 0
 sol_dict = dict()
+guess_meaning = str()
 
 async def play_wordle(message):
     """
@@ -31,7 +33,8 @@ async def play_wordle(message):
     global times_ans
 
     if (times_ans == 0):
-        global solution, meaning
+        global solution, meaning, sol_dict
+        sol_dict = dict()
         solution = await generate_5_letter_word()
 
         while (not has_meaning(solution, True)):
@@ -60,7 +63,7 @@ async def play_wordle(message):
         await msg_channel.send(f"```{times_ans} tries\n{solution} - {meaning}```", reference=message)
         times_ans  = 0
     else:
-        await msg_channel.send(f"```{times_ans} tries\n{result}```", reference=message)
+        await msg_channel.send(f"```{times_ans} tries\n{result}\n{msg} - {guess_meaning}```", reference=message)
         if times_ans == 6:
             times_ans = 0
             await msg_channel.send(f"```{solution} - {meaning}```", reference=message)
@@ -75,6 +78,8 @@ def has_meaning(word: str, is_solution: bool):
         if (is_solution):
             global meaning
             meaning = temp
+        global guess_meaning
+        guess_meaning = temp
     except:
         return False
     return True
@@ -88,29 +93,30 @@ def check_ans(guess: str):
     gue_dict = dict()
     now_dict = dict()
 
-    # Correct cases
     for i in range(5):
         char = guess[i]
         if (char in solution):
-            gue_dict[char] = guess.count
+            gue_dict[char] = guess.count(char)
             now_dict[char] = 0
 
-    # Wrong cases
+    # Correct cases
     for i in range(5):
         char = guess[i]
-        # Wrong spot
         if (char == solution[i]):
             now_dict[char] += 1
-            result[i] = solution[i]
-        # Absent cases
-        else:
-            result[i] = "-"
+            result[i] = char
 
+    # Wrong cases/spot
     for i in range(5):
         char = guess[i]
+        if (result[i] != ""):
+            continue
         if (char in solution and now_dict[char] < sol_dict[char]):
             now_dict[char] += 1
             result[i] = char.lower()
+        # Absent cases
+        else:
+            result[i] = "-"
     
     return "".join(result)
 
@@ -130,7 +136,10 @@ async def text_to_code(message):
     lang = msg.split()[0]
     code = msg[len(lang):]
 
-    await message.channel.send(f"```{lang}\nFrom: {user}\n\n{code}```")
+    if (lang in language):
+        await message.channel.send(f"```{lang}\nFrom: {user}\n\n{code}```")
+    else:
+        await message.channel.send(f"```c\nFrom: {user}\n\n{msg}```")
     await message.delete()
 
     return
