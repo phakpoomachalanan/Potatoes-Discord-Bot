@@ -1,6 +1,7 @@
 import discord
 import openai
 import asyncio
+import requests
 from os import getenv
 from dotenv import load_dotenv
 
@@ -12,61 +13,96 @@ CODE_CHANNEL_ID = getenv("CODE_CHANNEL_ID")
 CHATGPT_CHANNEL_ID = getenv("CHATGPT_CHANNEL_ID")
 WORDLE_CHANNEL_ID = getenv("WORDLE_CHANNEL_ID")
 
+WORD_URL = "https://random-word-api.herokuapp.com/word?length=5"
+DICT_URL = "https://api.dictionaryapi.dev/api/v2/entries/en/"
+
 client = discord.Client(intents=discord.Intents(members=True, message_content=True, guild_messages=True, guild_reactions=True, guilds=True))
 openai.api_key = OPENAI_API_KEY
 
 solution = "qwert".upper()
 meaning = "asd"
 times_ans = 0
+sol_dict = dict()
 
 async def play_wordle(message):
     global times_ans
 
     if (times_ans == 0):
         global solution, meaning
-        temp = await generate_5_letter_word()
-        print(temp)
-        temp = temp.split()
-        solution = temp[0].upper()
-        meaning = " ".join(temp[2:])
+        solution = await generate_5_letter_word()
+
+        while (has_meaning(solution, True) == False):
+            solution = await generate_5_letter_word()
+
+        print(solution, meaning)
+        for i in range(5):
+            char = solution[i]
+            sol_dict[char] = solution.count(char)
 
     msg_channel = message.channel
     msg = message.content.upper()
+    
+    if (has_meaning(msg, False) == False):
+        await msg_channel.send(f"No Definitions Found.", reference=message)
+        return
 
     if (len(msg) != 5):
-        await msg_channel.send("5-letter word only. Please try again.")
+        await msg_channel.send("5-letter word only. Please try again.", reference=message)
         return
 
     times_ans += 1
     result = check_ans(msg)
 
     if (result == solution):
-        await msg_channel.send(f"```{times_ans} tries\n{solution} - {meaning}```", refernce=message)
+        await msg_channel.send(f"```{times_ans} tries\n{solution} - {meaning}```", reference=message)
         times_ans  = 0
     else:
-        await msg_channel.send(f"```{times_ans} tries\n{result}```", refernce=message)
+        await msg_channel.send(f"```{times_ans} tries\n{result}```", reference=message)
         if times_ans == 6:
             times_ans = 0
-            await msg_channel.send(f"{solution} - {meaning}", refernce=message)
+            await msg_channel.send(f"```{solution} - {meaning}```", reference=message)
+
+def has_meaning(word, is_solution):
+    temp = requests.get(DICT_URL + word).json()
+    try: 
+        temp = temp[0]["meanings"][0]["definitions"][0]["definition"]
+        if (is_solution):
+            global meaning
+            meaning = temp
+    except:
+        return False
+    return True
 
 def check_ans(guess):
-    result = ""
+    result = ["" for i in range(5)]
     
-    print(solution)
-    print(guess)
+    gue_dict = dict()
+    now_dict = dict()
+
     for i in range(5):
-        if (guess[i] == solution[i]):
-            result += solution[i]
-        elif (guess[i] in solution):
-            result += solution[i].lower()
+        char = guess[i]
+        if (char in solution):
+            gue_dict[char] = guess.count
+            now_dict[char] = 0
+
+    for i in range(5):
+        char = guess[i]
+        if (char == solution[i]):
+            now_dict[char] += 1
+            result[i] = solution[i]
         else:
-            result += "-"
+            result[i] = "-"
+    for i in range(5):
+        char = guess[i]
+        if (char in solution and now_dict[char] < sol_dict[char]):
+            now_dict[char] += 1
+            result[i] = char.lower()
     
-    return result
+    return "".join(result)
 
 async def generate_5_letter_word():
-    response = await get_ans("generate one word with 5-letters and meaning. answer format word - meaning")
-    return response
+    response = requests.get("https://random-word-api.herokuapp.com/word?length=5")
+    return response.content.decode("utf-8").strip("[\"]").upper()
 
 async def text_to_code(message):
     user = message.autho
@@ -113,7 +149,9 @@ async def on_message(message):
         return
     
     msg_channel = str(message.channel.id)
-
+    
+    if (message.content.startswith("//")):
+        return
     if (msg_channel == CODE_CHANNEL_ID):
         await text_to_code(message)
     elif (msg_channel == CHATGPT_CHANNEL_ID):
