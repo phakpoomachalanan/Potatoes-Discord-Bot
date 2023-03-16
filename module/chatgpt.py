@@ -11,7 +11,7 @@ async def ask_chat_gpt(message):
     """
     
     """
-    msg = message.content + " please make response message under 2000 letters"
+    msg = message.content + " please make your response message under 2000 letters"
     response = await get_ans(msg)
     if (response != "null"):
         await message.channel.send(response, reference=message)

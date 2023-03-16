@@ -1,11 +1,9 @@
 import discord
-import openai
-import asyncio
 from os import getenv
 from dotenv import load_dotenv
-from chatgpt import *
-from wordle import *
-from text_to_code import *
+from module.chatgpt import *
+from module.wordle import *
+from module.text_to_code import *
 
 load_dotenv('.env')
 

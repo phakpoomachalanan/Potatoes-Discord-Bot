@@ -1,5 +1,5 @@
-from dis_com import *
-from lang import lang as language
+from module.dis_com import *
+from var.lang import lang as language
 
 async def text_to_code(message):
     """

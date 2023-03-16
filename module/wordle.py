@@ -1,5 +1,5 @@
 import requests
-from dis_com import *
+from module.dis_com import *
 
 solution = ""
 meaning = ""
