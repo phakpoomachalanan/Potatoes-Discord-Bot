@@ -44,7 +44,6 @@ async def init_wordle():
     for i in range(5):
         char = solution[i]
         sol_dict[char] = solution.count(char)
-    return solution, meaning
     
 async def play_wordle(message):
     """
@@ -67,12 +66,14 @@ async def play_wordle(message):
 
     if (result == solution):
         await send_msg(message, f"```{times_ans} tries\n{solution} - {meaning}```", True)
+        await init_wordle()
         times_ans  = 0
     else:
         await send_msg(message, f"```{times_ans} tries\n{result}\n{msg} - {guess_meaning}```", True)
         if times_ans == 6:
-            times_ans = 0
             await send_msg(message, f"```{solution} - {meaning}```", True)
+            times_ans = 0
+            await init_wordle()
 
 def check_ans(guess: str):
     """

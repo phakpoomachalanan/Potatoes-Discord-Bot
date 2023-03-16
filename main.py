@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from module.chatgpt import *
 from module.wordle import *
 from module.text_to_code import *
+from module.dis_com import *
 
 load_dotenv('.env')
 
@@ -17,9 +18,7 @@ client = discord.Client(intents=discord.Intents(members=True, message_content=Tr
 
 @client.event
 async def on_ready():
-    solution, meaning = await init_wordle()
-    channel = client.get_channel(int(WORDLE_ANS_CHANNEL_ID))
-    await channel.send(f"{solution} - {meaning}")
+    await init_wordle()
 
 @client.event
 async def on_message(message):
