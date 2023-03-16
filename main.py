@@ -5,6 +5,8 @@ import requests
 from os import getenv
 from dotenv import load_dotenv
 from lang import lang as language
+from chatgpt import *
+from wordle import *
 
 load_dotenv('.env')
 
@@ -13,6 +15,7 @@ OPENAI_API_KEY = getenv("OPENAI_API_KEY")
 CODE_CHANNEL_ID = getenv("CODE_CHANNEL_ID")
 CHATGPT_CHANNEL_ID = getenv("CHATGPT_CHANNEL_ID")
 WORDLE_CHANNEL_ID = getenv("WORDLE_CHANNEL_ID")
+WORDLE_ANS_CHANNEL_ID = getenv("WORDLE_ANS_CHANNEL_ID")
 
 WORD_URL = "https://random-word-api.herokuapp.com/word?length=5"
 DICT_URL = "https://api.dictionaryapi.dev/api/v2/entries/en/"
@@ -20,53 +23,18 @@ DICT_URL = "https://api.dictionaryapi.dev/api/v2/entries/en/"
 client = discord.Client(intents=discord.Intents(members=True, message_content=True, guild_messages=True, guild_reactions=True, guilds=True))
 openai.api_key = OPENAI_API_KEY
 
-solution = "mails".upper()
-meaning = "idk"
+solution = ""
+meaning = ""
 times_ans = 0
 sol_dict = dict()
 guess_meaning = str()
 
-async def play_wordle(message):
+async def generate_5_letter_word():
     """
-    Wordle main program
+    Get random 5-letter word from random-word-api.herokuapp
     """
-    global times_ans
-
-    if (times_ans == 0):
-        global solution, meaning, sol_dict
-        sol_dict = dict()
-        solution = await generate_5_letter_word()
-
-        while (not has_meaning(solution, True)):
-            solution = await generate_5_letter_word()
-
-        print(solution, meaning)
-        for i in range(5):
-            char = solution[i]
-            sol_dict[char] = solution.count(char)
-
-    msg_channel = message.channel
-    msg = message.content.upper()
-
-    if (not has_meaning(msg, False)):
-        await msg_channel.send(f"No Definitions Found.", reference=message)
-        return
-
-    if (len(msg) != 5):
-        await msg_channel.send("5-letter word only. Please try again.", reference=message)
-        return
-
-    times_ans += 1
-    result = check_ans(msg)
-
-    if (result == solution):
-        await msg_channel.send(f"```{times_ans} tries\n{solution} - {meaning}```", reference=message)
-        times_ans  = 0
-    else:
-        await msg_channel.send(f"```{times_ans} tries\n{result}\n{msg} - {guess_meaning}```", reference=message)
-        if times_ans == 6:
-            times_ans = 0
-            await msg_channel.send(f"```{solution} - {meaning}```", reference=message)
+    response = requests.get("https://random-word-api.herokuapp.com/word?length=5")
+    return response.content.decode("utf-8").strip("[\"]").upper()
 
 def has_meaning(word: str, is_solution: bool):
     """
@@ -83,6 +51,47 @@ def has_meaning(word: str, is_solution: bool):
     except:
         return False
     return True
+
+async def init_wordle():
+    global solution, meaning, sol_dict
+    sol_dict = dict()
+    solution = await generate_5_letter_word()
+
+    while (not has_meaning(solution, True)):
+        solution = await generate_5_letter_word()
+
+    for i in range(5):
+        char = solution[i]
+        sol_dict[char] = solution.count(char)
+    
+async def play_wordle(message):
+    """
+    Wordle main program
+    """
+    global times_ans
+
+    msg_channel = message.channel
+    msg = message.content.upper()
+
+    if (len(msg) != 5):
+        await msg_channel.send("5-letter word only. Please try again.", reference=message)
+        return
+
+    if (not has_meaning(msg, False)):
+        await msg_channel.send(f"No Definitions Found.", reference=message)
+        return
+
+    times_ans += 1
+    result = check_ans(msg)
+
+    if (result == solution):
+        await msg_channel.send(f"```{times_ans} tries\n{solution} - {meaning}```", reference=message)
+        times_ans  = 0
+    else:
+        await msg_channel.send(f"```{times_ans} tries\n{result}\n{msg} - {guess_meaning}```", reference=message)
+        if times_ans == 6:
+            times_ans = 0
+            await msg_channel.send(f"```{solution} - {meaning}```", reference=message)
 
 def check_ans(guess: str):
     """
@@ -120,12 +129,6 @@ def check_ans(guess: str):
     
     return "".join(result)
 
-async def generate_5_letter_word():
-    """
-    Get random 5-letter word from random-word-api.herokuapp
-    """
-    response = requests.get("https://random-word-api.herokuapp.com/word?length=5")
-    return response.content.decode("utf-8").strip("[\"]").upper()
 
 async def text_to_code(message):
     """
@@ -141,8 +144,6 @@ async def text_to_code(message):
     else:
         await message.channel.send(f"```c\nFrom: {user}\n\n{msg}```")
     await message.delete()
-
-    return
 
 async def ask_chat_gpt(message):
     """
@@ -176,7 +177,9 @@ async def get_ans(msg: str):
 
 @client.event
 async def on_ready():
-    print("Potato")
+    await init_wordle()
+    channel = client.get_channel(int(WORDLE_ANS_CHANNEL_ID))
+    await channel.send(f"{solution} - {meaning}")
 
 @client.event
 async def on_message(message):
@@ -187,6 +190,7 @@ async def on_message(message):
         return
     
     msg_channel = str(message.channel.id)
+    # print(msg_channel)
     
     if (message.content.startswith("//")):
         return
