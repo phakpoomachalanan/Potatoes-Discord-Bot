@@ -1,10 +1,9 @@
 import discord
 from os import getenv
 from dotenv import load_dotenv
-from module.chatgpt import *
-from module.wordle import *
-from module.text_to_code import *
-from module.dis_com import *
+import module.chatgpt as chatgpt
+import module.wordle as wordle
+import module.text_to_code as toc
 
 load_dotenv('.env')
 
@@ -18,7 +17,7 @@ client = discord.Client(intents=discord.Intents(members=True, message_content=Tr
 
 @client.event
 async def on_ready():
-    await init_wordle()
+    await wordle.init_wordle()
 
 @client.event
 async def on_message(message):
@@ -34,11 +33,11 @@ async def on_message(message):
     if (message.content.startswith("//")):
         return
     if (msg_channel == CODE_CHANNEL_ID):
-        await text_to_code(message)
+        await toc.text_to_code(message)
     elif (msg_channel == CHATGPT_CHANNEL_ID):
-        await ask_chat_gpt(message)
+        await chatgpt.ask_chat_gpt(message)
     elif (msg_channel == WORDLE_CHANNEL_ID):
-        await play_wordle(message)
+        await wordle.play_wordle(message)
 
 if (__name__ == "__main__"):
     client.run(TOKEN)
