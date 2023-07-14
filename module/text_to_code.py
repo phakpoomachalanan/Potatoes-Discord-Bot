@@ -1,4 +1,4 @@
-from module.dis_com import *
+import module.dis_com as dis
 from var.lang import lang as language
 
 async def text_to_code(message):
@@ -11,7 +11,7 @@ async def text_to_code(message):
     code = msg[len(lang):]
 
     if (lang in language):
-        await send_msg(message, f"```{lang}\nFrom: {user}\n\n{code}```")
+        await dis.send_msg(message, f"```{lang}\nFrom: {user}\n\n{code}```")
     else:
-        await send_msg(message, f"```c\nFrom: {user}\n\n{msg}```")
+        await dis.send_msg(message, f"```c\nFrom: {user}\n\n{msg}```")
     await message.delete()
