@@ -29,7 +29,8 @@ async def has_meaning(word: str, is_solution: bool):
             meaning = temp
         global guess_meaning
         guess_meaning = temp
-    except:
+    except KeyError:
+        # KeyError: 0 => no respose from request
         return False
     return True
 
