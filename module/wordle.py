@@ -80,7 +80,7 @@ def check_ans(guess: str):
     """
     Return how close your guess was to the word.
     """
-    result = ["" for i in range(5)]
+    result = [""] * 5
     
     gue_dict = dict()
     now_dict = dict()
