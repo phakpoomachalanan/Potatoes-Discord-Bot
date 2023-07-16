@@ -3,7 +3,7 @@ from os import getenv
 from dotenv import load_dotenv
 import module.chatgpt as chatgpt
 import module.wordle as wordle
-import module.text_to_code as toc
+import module.text_to_code as ttc
 
 load_dotenv('.env')
 
@@ -33,7 +33,7 @@ async def on_message(message):
     if (message.content.startswith("//")):
         return
     if (msg_channel == CODE_CHANNEL_ID):
-        await toc.text_to_code(message)
+        await ttc.text_to_code(message)
     elif (msg_channel == CHATGPT_CHANNEL_ID):
         await chatgpt.ask_chat_gpt(message)
     elif (msg_channel == WORDLE_CHANNEL_ID):
