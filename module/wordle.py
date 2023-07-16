@@ -35,7 +35,10 @@ async def has_meaning(word: str, is_solution: bool):
     return True
 
 async def init_wordle():
-    global solution, meaning, sol_dict
+    global solution, meaning, sol_dict, times_ans
+
+    times_ans  = 0
+
     sol_dict = dict()
     solution = await generate_5_letter_word()
 
@@ -68,12 +71,10 @@ async def play_wordle(message):
     if (result == solution):
         await dis.send_msg(message, f"```{times_ans} tries\n{solution} - {meaning}```", True)
         await init_wordle()
-        times_ans  = 0
     else:
         await dis.send_msg(message, f"```{times_ans} tries\n{result}\n{msg} - {guess_meaning}```", True)
         if times_ans == 6:
             await dis.send_msg(message, f"```{solution} - {meaning}```", True)
-            times_ans = 0
             await init_wordle()
 
 def check_ans(guess: str):
