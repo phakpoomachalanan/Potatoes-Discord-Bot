@@ -1,10 +1,10 @@
 import discord
-import subprocess
-from os import getenv, getcwd
+from os import getenv
 from dotenv import load_dotenv
 import module.chatgpt as chatgpt
-import module.wordle as wordle
+import module.sh_command as sh
 import module.text_to_code as ttc
+import module.wordle as wordle
 
 load_dotenv('.env')
 
@@ -33,6 +33,8 @@ async def on_message(message):
     msg_channel = str(message.channel.id)
     msg_content = str(message.content)
 
+    print(msg_channel)
+
     if (msg_content.startswith("//")):
         return
     if (msg_channel == CODE_CHANNEL_ID):
@@ -43,19 +45,7 @@ async def on_message(message):
         await wordle.play_wordle(message)
     elif (msg_channel == SERVER_CHANNEL_ID):
         if (str(message.author.id) == SUPER_USER):
-            if (msg_content.startswith("$")):
-                sh_script = msg_content.strip("$ ")
-                print(sh_script)
-                if (sh_script == "git pull"):
-                    sh_script = "git --work-tree=/home/popupie/pupserver/ZideQuest-Backend --git-dir=/home/popupie/pupserver/ZideQuest-Backend/.git pull".split()
-                    # sh_script = "git --work-tree=/Users/puppie/Code/Potatoes-Discord-Bot --git-dir=/Users/puppie/Code/Potatoes-Discord-Bot/.git pull".split()
-                    result = subprocess.run(sh_script, stdout=subprocess.PIPE).stdout.decode("utf-8")
-                else:
-                    result = subprocess.run(sh_script, stdout=subprocess.PIPE).stdout.decode("utf-8")
-                if (len(result) == 0):
-                    await message.channel.send(f'```No output```')
-                else:
-                    await message.channel.send(f'```{result}```')
+            await sh.command(message)
 
 if (__name__ == "__main__"):
     client.run(TOKEN)
