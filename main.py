@@ -44,6 +44,8 @@ async def on_message(message):
     elif (msg_channel == SERVER_CHANNEL_ID):
         if (str(message.author.id) == SUPER_USER):
             await sh.command(message)
+        else:
+            await message.channel.send(f"Unauthorized user", has_ref=True)
 
 if (__name__ == "__main__"):
     client.run(TOKEN)
