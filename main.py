@@ -47,11 +47,15 @@ async def on_message(message):
                 sh_script = msg_content.strip("$ ")
                 print(sh_script)
                 if (sh_script == "git pull"):
-                    result = subprocess.run("git pull", stdout=subprocess.PIPE)
-                    # result = subprocess.run("pushd /home/popupie/pupserver/ZideQuest-Backend && git pull && popd", stdout=subprocess.PIPE)
+                    sh_script = "git --work-tree=/home/popupie/pupserver/ZideQuest-Backend --git-dir=/home/popupie/pupserver/ZideQuest-Backend/.git pull".split()
+                    # sh_script = "git --work-tree=/Users/puppie/Code/Potatoes-Discord-Bot --git-dir=/Users/puppie/Code/Potatoes-Discord-Bot/.git pull".split()
+                    result = subprocess.run(sh_script, stdout=subprocess.PIPE).stdout.decode("utf-8")
                 else:
-                    result = subprocess.run(sh_script, stdout=subprocess.PIPE)
-                await message.channel.send(f'```{result.stdout.decode("utf-8")}```')
+                    result = subprocess.run(sh_script, stdout=subprocess.PIPE).stdout.decode("utf-8")
+                if (len(result) == 0):
+                    await message.channel.send(f'```No output```')
+                else:
+                    await message.channel.send(f'```{result}```')
 
 if (__name__ == "__main__"):
     client.run(TOKEN)
