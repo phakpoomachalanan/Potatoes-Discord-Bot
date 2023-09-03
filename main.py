@@ -29,9 +29,9 @@ async def on_message(message):
     """
     if message.author == client.user:
         return
-    
     msg_channel = str(message.channel.id)
     msg_content = str(message.content)
+    print(msg_content)
 
     if (msg_content.startswith("//")):
         return
