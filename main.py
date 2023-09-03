@@ -31,7 +31,6 @@ async def on_message(message):
         return
     msg_channel = str(message.channel.id)
     msg_content = str(message.content)
-    print(msg_content)
 
     if (msg_content.startswith("//")):
         return
