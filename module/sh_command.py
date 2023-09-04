@@ -22,7 +22,9 @@ async def command(message):
             sh_script = f"git --work-tree={path} --git-dir={path}/.git pull".split()
         elif (sh_script.startswith("rm")):
             return
-        result = subprocess.run(sh_script.split(), stdout=subprocess.PIPE).stdout.decode("utf-8")
+        else:
+            sh_script = sh_script.split()
+        result = subprocess.run(sh_script, stdout=subprocess.PIPE).stdout.decode("utf-8")
         if (len(result) == 0):
             result = "No output"
         await dis.send_msg(message, f'```{result}```')
