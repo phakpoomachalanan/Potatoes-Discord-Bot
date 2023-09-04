@@ -13,6 +13,7 @@ CODE_CHANNEL_ID = getenv("CODE_CHANNEL_ID")
 CHATGPT_CHANNEL_ID = getenv("CHATGPT_CHANNEL_ID")
 WORDLE_CHANNEL_ID = getenv("WORDLE_CHANNEL_ID")
 SUPER_USER = getenv("SUPER_USER")
+KIT = getenv("KIT")
 SERVER_CHANNEL_ID = getenv("SERVER_CHANNEL_ID")
 
 
@@ -31,6 +32,8 @@ async def on_message(message):
         return
     msg_channel = str(message.channel.id)
     msg_content = str(message.content)
+    print(message.author.id)
+    print(msg_content)
 
     if (msg_content.startswith("//")):
         return
@@ -41,7 +44,7 @@ async def on_message(message):
     elif (msg_channel == WORDLE_CHANNEL_ID):
         await wordle.play_wordle(message)
     elif (msg_channel == SERVER_CHANNEL_ID):
-        if (str(message.author.id) == SUPER_USER):
+        if (str(message.author.id) in [SUPER_USER, KIT]):
             await sh.command(message)
         else:
             await message.channel.send(f"Unauthorized user", has_ref=True)
