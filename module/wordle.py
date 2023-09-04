@@ -14,7 +14,7 @@ async def generate_5_letter_word():
     """
     Get random 5-letter word from random-word-api.herokuapp
     """
-    response = requests.get("https://random-word-api.herokuapp.com/word?length=5")
+    response = requests.get(WORD_URL)
     return response.content.decode("utf-8").strip("[\"]").upper()
 
 async def has_meaning(word: str, is_solution: bool):
