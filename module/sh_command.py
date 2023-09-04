@@ -20,6 +20,8 @@ async def command(message):
             except KeyError:
                 await dis.send_msg(message, f'```Cannot find git repo```')
             sh_script = f"git --work-tree={path} --git-dir={path}/.git pull".split()
+        elif (sh_script.startwith("rm")):
+            return
         result = subprocess.run(sh_script.split(), stdout=subprocess.PIPE).stdout.decode("utf-8")
         if (len(result) == 0):
             result = "No output"
