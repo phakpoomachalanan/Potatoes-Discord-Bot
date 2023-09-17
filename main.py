@@ -35,7 +35,7 @@ async def on_message(message):
 
     if (msg_content.startswith("//")):
         return
-    if ("crazy" in msg_content):
+    if ("crazy" in msg_content.lower()):
         await message.channel.send(f"crazy? I was crazy once.", has_ref=True)
     if (msg_channel == CODE_CHANNEL_ID):
         await ttc.text_to_code(message)
