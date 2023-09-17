@@ -1,4 +1,5 @@
 import requests
+import string
 import module.dis_com as dis
 
 solution = ""
@@ -6,7 +7,7 @@ meaning = ""
 times_ans = 0
 sol_dict = dict()
 guess_meaning = str()
-
+keyboard = dict()
 
 WORD_URL = "https://random-word-api.herokuapp.com/word?length=5"
 DICT_URL = "https://api.dictionaryapi.dev/api/v2/entries/en/"
@@ -16,7 +17,6 @@ async def generate_5_letter_word():
     Get random 5-letter word from random-word-api.herokuapp
     """
     response = requests.get(WORD_URL)
-    print(response.content)
     return response.content.decode("utf-8").strip("[\"]").upper()
 
 async def has_meaning(word: str, is_solution: bool):
@@ -37,12 +37,13 @@ async def has_meaning(word: str, is_solution: bool):
     return True
 
 async def init_wordle():
-    global solution, meaning, sol_dict, times_ans
+    global solution, meaning, sol_dict, times_ans, keyboard
 
     times_ans  = 0
 
     sol_dict = dict()
-    solution = await generate_5_letter_word()
+    solution = await generate_5_letter_word().upper()
+    print(solution)
 
     while (not await has_meaning(solution, True)):
         solution = await generate_5_letter_word()
@@ -51,19 +52,21 @@ async def init_wordle():
         char = solution[i]
         sol_dict[char] = solution.count(char)
     
+    keyboard = {key: False for key in string.ascii_uppercase}
+    
 async def play_wordle(message):
     """
     Wordle main program
     """
     global times_ans
 
-    msg = message.content.upper()
+    msg = message.content.strip().upper()
 
     if ('-' in msg):
         if (msg == "help-me"):
             return
         elif (msg == "key-left"):
-            return
+            get_key(True)
         elif (msg == "key-used"):
             return
         else:
@@ -80,7 +83,7 @@ async def play_wordle(message):
     times_ans += 1
     result = check_ans(msg)
 
-    if (result == solution):
+    if (msg == solution):
         await dis.send_msg(message, f"{result}\n```{times_ans} tries\n{msg} - {meaning}```", True)
         await init_wordle()
     else:
@@ -93,13 +96,15 @@ def check_ans(guess: str):
     """
     Return how close your guess was to the word.
     """
+    global keyboard
+    
     result = [""] * 5
     
     gue_dict = dict()
     now_dict = dict()
 
-    for i in range(5):
-        char = guess[i]
+    for char in guess:
+        keyboard[char] = True
         if (char in solution):
             gue_dict[char] = guess.count(char)
             now_dict[char] = 0
@@ -124,3 +129,14 @@ def check_ans(guess: str):
             result[i] = ":red_square:"
     
     return " ".join(result)
+
+def get_key(isUsed):
+    """
+    isUsed == True: return used keys
+    isUsed == False: return unused keys
+    """
+    keys = list()
+    for key, val in keyboard.items():
+        if (val ^ isUsed):
+            keys.append(key)
+    return sorted(keys)
