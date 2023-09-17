@@ -66,7 +66,7 @@ async def play_wordle(message):
             return
         elif (msg == "key-used"):
             return
-        else
+        else:
             return
 
     if (len(msg) != 5):
