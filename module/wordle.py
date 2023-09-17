@@ -65,8 +65,7 @@ async def play_wordle(message):
 
     if ('-' in msg):
         if (msg == "HELP-ME"):
-            msg = """
-Q:  How to play?
+            msg = """Q:  How to play?
 A:  Guess the Wordle in 6 tries.
     Each guess must be a valid 5-letter word.
     The color of the tiles will change to show how close your guess was to the word.
@@ -77,6 +76,7 @@ Red rectangle => is not in the word in any spot
 
 credits: https://www.nytimes.com/games/wordle/index.html
 """
+            await dis.send_msg(message, f"```{msg}```", True)
         elif (msg == "END-GAME"):
             await dis.send_msg(message, f"```{solution} - {meaning}```", True)
             await init_wordle()
