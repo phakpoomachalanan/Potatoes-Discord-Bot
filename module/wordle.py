@@ -52,7 +52,6 @@ async def init_wordle():
         sol_dict[char] = solution.count(char)
 
     solution = solution.upper()
-    print(solution)
     
     keyboard = {key: False for key in string.ascii_uppercase}
     
