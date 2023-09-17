@@ -7,6 +7,7 @@ times_ans = 0
 sol_dict = dict()
 guess_meaning = str()
 
+
 WORD_URL = "https://random-word-api.herokuapp.com/word?length=5"
 DICT_URL = "https://api.dictionaryapi.dev/api/v2/entries/en/"
 
@@ -57,6 +58,16 @@ async def play_wordle(message):
     global times_ans
 
     msg = message.content.upper()
+
+    if ('-' in msg):
+        if (msg == "help-me"):
+            return
+        elif (msg == "key-left"):
+            return
+        elif (msg == "key-used"):
+            return
+        else
+            return
 
     if (len(msg) != 5):
         await dis.send_msg(message, "5-letter word only. Please try again.", True)
