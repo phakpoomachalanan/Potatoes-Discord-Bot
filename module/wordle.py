@@ -42,8 +42,7 @@ async def init_wordle():
     times_ans  = 0
 
     sol_dict = dict()
-    solution = await generate_5_letter_word().upper()
-    print(solution)
+    solution = await generate_5_letter_word()
 
     while (not await has_meaning(solution, True)):
         solution = await generate_5_letter_word()
@@ -51,6 +50,9 @@ async def init_wordle():
     for i in range(5):
         char = solution[i]
         sol_dict[char] = solution.count(char)
+
+    solution = solution.upper()
+    print(solution)
     
     keyboard = {key: False for key in string.ascii_uppercase}
     
