@@ -66,12 +66,17 @@ async def play_wordle(message):
     if ('-' in msg):
         if (msg == "help-me"):
             return
-        elif (msg == "key-left"):
-            get_key(True)
-        elif (msg == "key-used"):
-            return
-        else:
-            return
+        elif (msg == "KEY-LEFT"):
+            keys = get_key(True)
+            for i in range(5, len(keys), 6):
+                keys.insert(i, '\n')
+            await dis.send_msg(message, f"``` {' '.join(keys)}```", True)
+        elif (msg == "KEY-USED"):
+            keys = get_key(False)
+            for i in range(5, len(keys), 6):
+                keys.insert(i, '\n')
+            await dis.send_msg(message, f"``` {' '.join(keys)}```", True)
+        return
 
     if (len(msg) != 5):
         await dis.send_msg(message, "5-letter word only. Please try again.", True)
