@@ -15,6 +15,7 @@ async def generate_5_letter_word():
     Get random 5-letter word from random-word-api.herokuapp
     """
     response = requests.get(WORD_URL)
+    print(response.content)
     return response.content.decode("utf-8").strip("[\"]").upper()
 
 async def has_meaning(word: str, is_solution: bool):
@@ -69,10 +70,10 @@ async def play_wordle(message):
     result = check_ans(msg)
 
     if (result == solution):
-        await dis.send_msg(message, f"```{times_ans} tries\n{solution} - {meaning}```", True)
+        await dis.send_msg(message, f"{result}\n```{times_ans} tries\n{msg} - {meaning}```", True)
         await init_wordle()
     else:
-        await dis.send_msg(message, f"```{times_ans} tries\n{result}\n{msg} - {guess_meaning}```", True)
+        await dis.send_msg(message, f"{result}\n```{times_ans} tries\n{msg} - {guess_meaning}```", True)
         if times_ans == 6:
             await dis.send_msg(message, f"```{solution} - {meaning}```", True)
             await init_wordle()
@@ -97,7 +98,7 @@ def check_ans(guess: str):
         char = guess[i]
         if (char == solution[i]):
             now_dict[char] += 1
-            result[i] = char
+            result[i] = f":regional_indicator_{char.lower()}:"
 
     # Wrong cases/spot
     for i in range(5):
@@ -106,9 +107,9 @@ def check_ans(guess: str):
             continue
         if (char in solution and now_dict[char] < sol_dict[char]):
             now_dict[char] += 1
-            result[i] = char.lower()
+            result[i] = f" {char.upper()} "
         # Absent cases
         else:
-            result[i] = "-"
+            result[i] = ":red_square:"
     
-    return "".join(result)
+    return " ".join(result)
