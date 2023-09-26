@@ -20,6 +20,8 @@ async def command(message):
             except KeyError:
                 await dis.send_msg(message, f'```Cannot find git repo```')
             sh_script = f"git --work-tree={path} --git-dir={path}/.git pull".split()
+        elif (sh_script == "$ npm run dev"):
+            sh_script = f"npm run dev --prefix {GIT_PATH['Zide']}".split()
         else:
             return
         result = subprocess.run(sh_script, stdout=subprocess.PIPE).stdout.decode("utf-8")
