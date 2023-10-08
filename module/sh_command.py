@@ -15,7 +15,7 @@ async def command(message):
         sh_script = msg_content.strip("$ ")
         if (sh_script[:8] == "git pull"):
             try:
-                temp = sh_script.split(", ")[1]
+                temp = sh_script.split(", ")[1].split(" ")[0]
                 path = GIT_PATH[temp]
             except KeyError:
                 await dis.send_msg(message, f'```Cannot find git repo```')
