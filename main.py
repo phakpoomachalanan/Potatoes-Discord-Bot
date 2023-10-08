@@ -44,10 +44,7 @@ async def on_message(message):
     elif (msg_channel == WORDLE_CHANNEL_ID):
         await wordle.play_wordle(message)
     elif (msg_channel == SERVER_CHANNEL_ID):
-        if (str(message.author.id) in [SUPER_USER, KIT]):
-            await sh.command(message)
-        else:
-            await message.channel.send(f"Unauthorized user", reference=message)
+        await sh.command(message)
 
 if (__name__ == "__main__"):
     client.run(TOKEN)
