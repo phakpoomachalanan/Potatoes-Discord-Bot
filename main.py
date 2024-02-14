@@ -5,6 +5,7 @@ import module.chatgpt as chatgpt
 import module.sh_command as sh
 import module.text_to_code as ttc
 import module.wordle as wordle
+import random
 
 load_dotenv('.env')
 
@@ -45,6 +46,8 @@ async def on_message(message):
         await wordle.play_wordle(message)
     elif (msg_channel == SERVER_CHANNEL_ID):
         await sh.command(message)
+    elif (message.startswith("/drop?")):
+        await message.channel.send(["Yes", "No"][random.randint(0, 1)])
 
 if (__name__ == "__main__"):
     client.run(TOKEN)
