@@ -46,7 +46,7 @@ async def on_message(message):
         await wordle.play_wordle(message)
     elif (msg_channel == SERVER_CHANNEL_ID):
         await sh.command(message)
-    elif (message.startswith("/drop?")):
+    elif (message.content.startswith("/drop?")):
         await message.channel.send(["Yes", "No"][random.randint(0, 1)])
 
 if (__name__ == "__main__"):
